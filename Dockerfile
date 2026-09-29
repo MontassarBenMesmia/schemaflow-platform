@@ -5,7 +5,7 @@ RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
-FROM maven:3.9-eclipse-temurin-17-alpine AS backend-build
+FROM maven:3-eclipse-temurin-26-alpine AS backend-build
 WORKDIR /workspace/backend
 COPY backend/pom.xml ./
 RUN mvn -B -q dependency:go-offline
