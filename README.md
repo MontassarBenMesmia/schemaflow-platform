@@ -5,10 +5,13 @@
 [![Spring Boot 4](https://img.shields.io/badge/Spring_Boot-4.1-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Angular 22](https://img.shields.io/badge/Angular-22-DD0031?logo=angular&logoColor=white)](https://angular.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-63f2ad.svg)](LICENSE)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Render-46E3B7?logo=render&logoColor=white)](https://schemaflow-platform.onrender.com)
 
 An observable relational-to-JSON analytics modernization platform built around SQL Server, Azure Databricks, ClickHouse, Spring Boot, and Angular.
 
 SchemaFlow demonstrates how normalized operational rows can become nested, lineage-aware analytical documents. It includes a safe public demo, a real ClickHouse adapter, a Databricks PySpark transformation, reproducible SQL schemas, CI, containers, health checks, and deployment configuration.
+
+**Live application:** [schemaflow-platform.onrender.com](https://schemaflow-platform.onrender.com)
 
 ![SchemaFlow migration dashboard](docs/screenshots/dashboard.png)
 

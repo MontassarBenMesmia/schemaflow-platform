@@ -6,6 +6,8 @@
 
 Render supplies `PORT`; Spring Boot binds to it automatically. The health check is `/api/v1/health`.
 
+The verified public deployment is available at [schemaflow-platform.onrender.com](https://schemaflow-platform.onrender.com). Render's free instances can take roughly a minute to wake after inactivity.
+
 ## Local ClickHouse integration
 
 ```bash
