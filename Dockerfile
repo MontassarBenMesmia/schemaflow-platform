@@ -13,7 +13,7 @@ COPY backend/src ./src
 COPY --from=frontend-build /workspace/frontend/dist/frontend/browser ./src/main/resources/static
 RUN mvn -B -q package -DskipTests
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 LABEL org.opencontainers.image.source="https://github.com/MontassarBenMesmia/schemaflow-platform" \
       org.opencontainers.image.description="Relational-to-JSON analytics modernization platform" \
       org.opencontainers.image.licenses="MIT"
