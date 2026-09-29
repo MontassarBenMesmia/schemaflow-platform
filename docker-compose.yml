@@ -1,0 +1,57 @@
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:25.8-alpine
+    environment:
+      CLICKHOUSE_DB: schemaflow
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+      - ./infra/clickhouse/init.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  loader:
+    image: python:3.12-alpine
+    environment:
+      CLICKHOUSE_URL: http://clickhouse:8123
+    volumes:
+      - ./scripts/load_demo_clickhouse.py:/work/load_demo_clickhouse.py:ro
+    command: ["python", "/work/load_demo_clickhouse.py"]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+  app:
+    build: .
+    environment:
+      SPRING_PROFILES_ACTIVE: clickhouse
+      CLICKHOUSE_URL: http://clickhouse:8123
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_PASSWORD: ""
+    ports:
+      - "8080:8080"
+    depends_on:
+      loader:
+        condition: service_completed_successfully
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    profiles: ["source"]
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-LocalOnly_StrongPassword123!}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+
+volumes:
+  clickhouse-data:
+  sqlserver-data:

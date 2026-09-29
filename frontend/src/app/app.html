@@ -1,0 +1,125 @@
+<div class="app-shell">
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="SchemaFlow home">
+      <span class="brand-mark">SF</span>
+      <span><strong>SchemaFlow</strong><small>Relational modernization</small></span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#explorer">Explorer</a>
+      <a href="/api/docs" target="_blank" rel="noreferrer">API</a>
+    </nav>
+    <span class="environment"><i></i>{{ dashboard()?.mode ?? 'connecting' }}</span>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">SQL Server → Databricks → ClickHouse</p>
+        <h1>Make relational data<br><span>analytics-ready.</span></h1>
+        <p class="lede">A traceable migration control plane that turns normalized SQL rows into validated, nested JSON documents for fast analytical workloads.</p>
+        <div class="hero-actions">
+          <button class="primary" type="button" (click)="runMigration()" [disabled]="running() || loading()">
+            <span>{{ running() ? 'Running pipeline…' : 'Run demo migration' }}</span>
+            <b aria-hidden="true">→</b>
+          </button>
+          <a class="secondary" href="#pipeline">Inspect architecture</a>
+        </div>
+        <p class="privacy-note">Fictional deterministic data · No credentials · No user uploads</p>
+      </div>
+      <div class="hero-visual" aria-label="Pipeline overview">
+        <div class="grid-glow"></div>
+        <div class="flow-card source"><span>01</span><small>Source</small><strong>SQL Server</strong><em>normalized rows</em></div>
+        <div class="connector one"><i></i></div>
+        <div class="flow-card transform"><span>02</span><small>Transform</small><strong>Databricks</strong><em>nested documents</em></div>
+        <div class="connector two"><i></i></div>
+        <div class="flow-card target"><span>03</span><small>Target</small><strong>ClickHouse</strong><em>analytical JSON</em></div>
+      </div>
+    </section>
+
+    @if (error()) { <div class="message error" role="alert">{{ error() }}</div> }
+    @if (notice()) { <div class="message success" role="status">{{ notice() }}</div> }
+
+    <section class="metrics" aria-label="Migration metrics">
+      <article><small>Source rows</small><strong>{{ dashboard()?.sourceRowCount ?? '—' }}</strong><span>normalized records</span></article>
+      <article><small>JSON documents</small><strong>{{ dashboard()?.documentCount ?? '—' }}</strong><span>analytics-ready</span></article>
+      <article><small>Row reduction</small><strong>{{ dashboard()?.rowReductionPercent ?? '—' }}%</strong><span>through nesting</span></article>
+      <article><small>Validation errors</small><strong class="good">{{ dashboard()?.validationErrors ?? '—' }}</strong><span>latest run</span></article>
+    </section>
+
+    <section class="section pipeline-section" id="pipeline">
+      <div class="section-heading">
+        <div><p class="eyebrow">Architecture</p><h2>One observable data journey</h2></div>
+        <p>{{ architecture()?.dataModel }}</p>
+      </div>
+      <div class="stage-list">
+        @for (stage of architecture()?.stages ?? []; track trackStage($index, stage)) {
+          <article class="stage">
+            <span class="stage-number">0{{ stage.order }}</span>
+            <div><small>{{ stage.name }}</small><h3>{{ stage.technology }}</h3><p>{{ stage.responsibility }}</p></div>
+            <span class="status">{{ stage.status }}</span>
+          </article>
+        }
+      </div>
+    </section>
+
+    <section class="section workspace" id="explorer">
+      <div class="section-heading compact">
+        <div><p class="eyebrow">Document explorer</p><h2>Inspect the transformed model</h2></div>
+        <div class="search-box">
+          <label for="document-search">Search documents</label>
+          <input id="document-search" type="search" maxlength="120" placeholder="Customer, region, SKU…"
+                 [ngModel]="query()" (ngModelChange)="query.set($event)" (keyup.enter)="filterDocuments()">
+          <button type="button" (click)="filterDocuments()" aria-label="Search">⌕</button>
+        </div>
+      </div>
+
+      <div class="collection-tabs" aria-label="Collections">
+        <button type="button" [class.active]="selectedCollection() === ''" (click)="chooseCollection('')">All collections</button>
+        @for (collection of dashboard()?.collections ?? []; track collection.collection) {
+          <button type="button" [class.active]="selectedCollection() === collection.collection" (click)="chooseCollection(collection.collection)">
+            {{ collection.collection }} <span>{{ collection.documentCount }}</span>
+          </button>
+        }
+      </div>
+
+      <div class="explorer-grid">
+        <div class="document-list">
+          @if (loading()) { <p class="empty">Loading documents…</p> }
+          @for (item of documents(); track item.documentId) {
+            <button type="button" class="document-row" [class.active]="selectedDocument()?.documentId === item.documentId" (click)="selectDocument(item)">
+              <span class="doc-icon">{{ '{ }' }}</span>
+              <span><strong>{{ item.documentId }}</strong><small>{{ item.collection }} · {{ item.sourceRowCount }} source rows</small></span>
+              <b>›</b>
+            </button>
+          } @empty { <p class="empty">No documents match this filter.</p> }
+        </div>
+        <article class="json-panel">
+          <header><div><small>JSON preview</small><strong>{{ selectedDocument()?.documentId ?? 'Select a document' }}</strong></div><span>read-only</span></header>
+          <pre><code>{{ documentJson() }}</code></pre>
+          @if (selectedDocument(); as selected) {
+            <footer><span>{{ selected.sourceRowCount }} relational rows</span><span>→</span><span>1 nested document</span></footer>
+          }
+        </article>
+      </div>
+    </section>
+
+    <section class="section quality">
+      <div>
+        <p class="eyebrow">Trust by design</p>
+        <h2>Migration safety is part of the product.</h2>
+        <p>Every public action is bounded and observable. Production connections use environment variables or Databricks secret scopes—never committed credentials.</p>
+      </div>
+      <ul>
+        @for (control of architecture()?.safetyControls ?? []; track control) {
+          <li><span>✓</span>{{ control }}</li>
+        }
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span><strong>SchemaFlow</strong> · Portfolio engineering project</span>
+    <span>Spring Boot · Angular · Databricks · ClickHouse</span>
+  </footer>
+</div>

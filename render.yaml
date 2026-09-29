@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: schemaflow-platform
+    runtime: docker
+    plan: free
+    repo: https://github.com/MontassarBenMesmia/schemaflow-platform
+    branch: main
+    healthCheckPath: /api/v1/health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: demo
