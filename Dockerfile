@@ -1,4 +1,5 @@
-FROM node:22-alpine AS frontend-build
+FROM node:22.23.4-alpine AS frontend-build
+RUN apk add --no-cache --upgrade ca-certificates
 WORKDIR /workspace/frontend
 COPY frontend/package*.json ./
 RUN npm ci
@@ -6,6 +7,17 @@ COPY frontend/ ./
 RUN npm run build
 
 FROM maven:3.9-eclipse-temurin-17-alpine AS backend-build
+RUN apk add --no-cache --upgrade ca-certificates
+RUN for alias in \
+      "cn_emsign_ecc_root_ca__c3,o_emudhra_inc,ou_emsign_pki,c_us [jdk]" \
+      "cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]" \
+      "cn_emsign_root_ca__c1,o_emudhra_inc,ou_emsign_pki,c_us [jdk]" \
+      "cn_emsign_root_ca__g1,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]"; do \
+      if keytool -list -cacerts -storepass changeit -alias "$alias" >/dev/null 2>&1; then \
+        keytool -delete -cacerts -storepass changeit -alias "$alias"; \
+      fi; \
+    done \
+    && ! keytool -list -cacerts -storepass changeit | grep -qi emudhra
 WORKDIR /workspace/backend
 COPY backend/pom.xml ./
 RUN mvn -B -q dependency:go-offline
@@ -14,6 +26,17 @@ COPY --from=frontend-build /workspace/frontend/dist/frontend/browser ./src/main/
 RUN mvn -B -q package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
+RUN apk add --no-cache --upgrade ca-certificates
+RUN for alias in \
+      "cn_emsign_ecc_root_ca__c3,o_emudhra_inc,ou_emsign_pki,c_us [jdk]" \
+      "cn_emsign_ecc_root_ca__g3,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]" \
+      "cn_emsign_root_ca__c1,o_emudhra_inc,ou_emsign_pki,c_us [jdk]" \
+      "cn_emsign_root_ca__g1,o_emudhra_technologies_limited,ou_emsign_pki,c_in [jdk]"; do \
+      if keytool -list -cacerts -storepass changeit -alias "$alias" >/dev/null 2>&1; then \
+        keytool -delete -cacerts -storepass changeit -alias "$alias"; \
+      fi; \
+    done \
+    && ! keytool -list -cacerts -storepass changeit | grep -qi emudhra
 LABEL org.opencontainers.image.source="https://github.com/MontassarBenMesmia/schemaflow-platform" \
       org.opencontainers.image.description="Relational-to-JSON analytics modernization platform" \
       org.opencontainers.image.licenses="MIT"
