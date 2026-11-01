@@ -6,7 +6,7 @@ RUN npm ci
 COPY frontend/ ./
 RUN npm run build
 
-FROM maven:3.9-eclipse-temurin-17-alpine AS backend-build
+FROM maven:3.9-eclipse-temurin-26-alpine AS backend-build
 RUN apk add --no-cache --upgrade ca-certificates
 RUN for alias in \
       "cn_emsign_ecc_root_ca__c3,o_emudhra_inc,ou_emsign_pki,c_us [jdk]" \
